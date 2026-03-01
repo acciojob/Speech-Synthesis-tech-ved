@@ -37,7 +37,81 @@
   const stopButton = document.querySelector('#stop');
 
   //Your code goes here
+	<script>
+const synth = window.speechSynthesis;
+
+const textInput = document.querySelector("textarea");
+const voiceSelect = document.querySelector("select");
+const speakBtn = document.getElementById("speak");
+const stopBtn = document.getElementById("stop");
+const rateSlider = document.getElementById("rate");
+const pitchSlider = document.getElementById("pitch");
+
+let voices = [];
+let utterance = null;
+
+// populate voices
+function loadVoices() {
+  voices = synth.getVoices();
+  voiceSelect.innerHTML = "";
+
+  if (voices.length === 0) {
+    const opt = document.createElement("option");
+    opt.textContent = "No voices available";
+    voiceSelect.appendChild(opt);
+    return;
+  }
+
+  voices.forEach((v, i) => {
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = v.name;
+    voiceSelect.appendChild(option);
+  });
+}
+
+// speak
+function speakText() {
+  const text = textInput.value.trim();
+  if (!text) return;
+
+  synth.cancel(); // restart if speaking
+
+  utterance = new SpeechSynthesisUtterance(text);
+
+  const selectedVoice = voices[voiceSelect.value];
+  if (selectedVoice) utterance.voice = selectedVoice;
+
+  utterance.rate = parseFloat(rateSlider.value);
+  utterance.pitch = parseFloat(pitchSlider.value);
+
+  synth.speak(utterance);
+}
+
+// stop
+function stopSpeech() {
+  synth.cancel();
+}
+
+// events
+speakBtn.addEventListener("click", speakText);
+stopBtn.addEventListener("click", stopSpeech);
+voiceSelect.addEventListener("change", speakText);
+rateSlider.addEventListener("input", () => {
+  if (utterance) utterance.rate = parseFloat(rateSlider.value);
+});
+pitchSlider.addEventListener("input", () => {
+  if (utterance) utterance.pitch = parseFloat(pitchSlider.value);
+});
+
+// voices load (async browser)
+loadVoices();
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = loadVoices;
+}
+	
 </script>
+
 
 </body>
 </html>
